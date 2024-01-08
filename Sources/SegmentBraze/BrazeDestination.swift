@@ -1,6 +1,7 @@
 import BrazeKit
 import Foundation
 import Segment
+import UIKit
 
 #if canImport(BrazeUI)
   import BrazeUI
@@ -70,6 +71,9 @@ public class BrazeDestination: DestinationPlugin, VersionedPlugin {
 
   private let additionalConfiguration: ((Braze.Configuration) -> Void)?
   private let additionalSetup: ((Braze) -> Void)?
+  private let enableTraitDiffing: Bool
+  private let userDefaultsDomain = "com.appboy.segment.userTraits"
+  private var userTraits: [String: Any]
 
   // - Braze / Segment bridge
 
@@ -89,11 +93,14 @@ public class BrazeDestination: DestinationPlugin, VersionedPlugin {
   ///       instance. You can use this to customize further your usage of the Braze SDK (e.g.
   ///       register UI delegates, messaging subscriptions, etc.)
   public init(
+    enableTraitDiffing: Bool,
     additionalConfiguration: ((Braze.Configuration) -> Void)? = nil,
     additionalSetup: ((Braze) -> Void)? = nil
   ) {
+    self.enableTraitDiffing = enableTraitDiffing
     self.additionalConfiguration = additionalConfiguration
     self.additionalSetup = additionalSetup
+    self.userTraits = UserDefaults.standard.dictionary(forKey: userDefaultsDomain) ?? [:]
   }
 
   // MARK: - Plugin
@@ -158,7 +165,10 @@ public class BrazeDestination: DestinationPlugin, VersionedPlugin {
       braze.changeUser(userId: userId)
     }
 
-    guard let traits = event.traits?.dictionaryValue else { return event }
+    guard var traits = event.traits?.dictionaryValue else { return event }
+    if enableTraitDiffing {
+        traits = userTraits.newOrDifferentEntries(from: traits)
+    }
 
     // Defined / known user attributes
     if let birthday = traits["birthday"] as? String {
@@ -257,6 +267,7 @@ public class BrazeDestination: DestinationPlugin, VersionedPlugin {
       }
     }
 
+    userTraits = userTraits.merging(traits) { _, last in last }
     return event
   }
 
@@ -282,6 +293,8 @@ public class BrazeDestination: DestinationPlugin, VersionedPlugin {
     self.log(message: "Wiping data and resetting Braze.")
     braze?.wipeData()
     braze?.enabled = true
+    UserDefaults.standard.removeObject(forKey: userDefaultsDomain)
+    userTraits.removeAll()
   }
 
   public func flush() {
@@ -394,7 +407,7 @@ public class BrazeDestination: DestinationPlugin, VersionedPlugin {
   private func log(message: String) {
     analytics?.log(message: "[BrazeSegment] \(message)")
   }
-  
+
   /// Prepares the object dictionary to be sent upstream to Braze.
   private func formatDictionary(_ jsonObject: [String: Any?]) -> [String: Any?] {
     jsonObject.mapValues { object in
@@ -410,7 +423,7 @@ public class BrazeDestination: DestinationPlugin, VersionedPlugin {
       }
     }
   }
-  
+
   /// Formats the array to convert any non-string values to strings.
   private func formatArray(_ jsonArray: [Any?]) -> [Any] {
     jsonArray.compactMap { object in
@@ -431,7 +444,7 @@ public class BrazeDestination: DestinationPlugin, VersionedPlugin {
       }
     }
   }
-  
+
   /// Fallback to casting the entire array to strings if it doesn't match a Braze-accepted format.
   private func castToStringArray(_ jsonArray: [Any?]) -> [String] {
     jsonArray.compactMap { object in
@@ -477,6 +490,12 @@ public class BrazeDestination: DestinationPlugin, VersionedPlugin {
     ]
   }
 
+}
+
+extension BrazeDestination: iOSLifecycle {
+    public func applicationWillResignActive(application: UIApplication?) {
+        UserDefaults.standard.set(userTraits, forKey: userDefaultsDomain)
+    }
 }
 
 // MARK: - Settings
