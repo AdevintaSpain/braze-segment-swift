@@ -1,0 +1,50 @@
+{
+  "pins" : [
+    {
+      "identity" : "analytics-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/segmentio/analytics-swift",
+      "state" : {
+        "revision" : "51f56b972de8daee251f18fd2c91fa3a33c8d77e",
+        "version" : "1.5.2"
+      }
+    },
+    {
+      "identity" : "braze-swift-sdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/braze-inc/braze-swift-sdk",
+      "state" : {
+        "revision" : "a3d83be34c5e3f32d91391544b2c18f707cd27eb",
+        "version" : "7.5.0"
+      }
+    },
+    {
+      "identity" : "jsonsafeencoder-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/segmentio/jsonsafeencoder-swift.git",
+      "state" : {
+        "revision" : "8b70dc8c01b7b041912e30e29d2b488a43f782ac",
+        "version" : "1.0.1"
+      }
+    },
+    {
+      "identity" : "sdwebimage",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SDWebImage/SDWebImage.git",
+      "state" : {
+        "revision" : "59730af512c06fb569c119d737df4c1c499e001d",
+        "version" : "5.18.10"
+      }
+    },
+    {
+      "identity" : "sovran-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/segmentio/sovran-swift.git",
+      "state" : {
+        "revision" : "64f3b5150c282a34af4578188dce2fd597e600e3",
+        "version" : "1.1.0"
+      }
+    }
+  ],
+  "version" : 2
+}

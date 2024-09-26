@@ -27,7 +27,8 @@ extension Analytics {
 
   static func makeBrazeDestination() -> BrazeDestination {
     BrazeDestination(
-      additionalConfiguration: { configuration in
+        enableTraitDiffing: true, 
+        additionalConfiguration: { configuration in
         // Configure the Braze SDK here, e.g.:
         // - Log general SDK information and errors
         configuration.logger.level = .info
